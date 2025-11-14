@@ -196,3 +196,70 @@ from decimal import Decimal
 # Book.objects.bulk_create()
 # Book.objects.bulk_update()
 
+
+
+# =====================================================
+# New Lecture AGGREGATE && ANNOTATE
+# =====================================================
+
+from library.models import Book, Category
+from django.db.models import (
+    Avg,
+    Count,
+    Min,
+    Max
+)
+from typing import Any
+
+# Посчитать общее кол-во книг + средняя цена всех книг
+
+# {} -> aggregate()
+
+# aggregate_result: dict[str, Any] = Book.objects.aggregate(
+#     books_count=Count('id'),
+#     avg_books_price=Avg('price')
+# )
+
+# print(f"Общее кол-во всех книг в базе = ", aggregate_result['books_count'])
+# print(f"Общее кол-во всех книг в базе = ", aggregate_result.get('books_count'))
+
+# print(f"Средняя цена всех книг в базе = ", aggregate_result['avg_books_price'])
+# print(f"Средняя цена всех книг в базе = ", aggregate_result.get('avg_books_price'))
+
+
+
+# aggregate_result_min_max: dict[str, Any] = Book.objects.aggregate(
+#     min_book_aprice=Min('price'),
+#     max_book_price=Max('price')
+# )
+#
+# print(aggregate_result_min_max)
+
+
+# annotate()
+
+
+# annotated_books_with_custom_field = Book.objects.values('author').annotate(
+#     books_count=Count('id')
+# ) # <QuerySet[{...}, ..., {...}]>
+
+# print(annotated_books_with_custom_field.query)
+
+
+# for obj in annotated_books_with_custom_field:
+#     print(f"Автор: {obj.author}, кол-во книг = {obj.books_count}")
+
+
+# for obj in annotated_books_with_custom_field:
+#     print(f"Автор: {obj['author']}, кол-во книг = {obj['books_count']}")
+
+
+# books_by_category = Category.objects.values('name_category').annotate(
+#     books_count=Count('books')
+# )
+
+# print(books_by_category)
+
+# for obj in books_by_category:
+#     print(f"Категории: {obj['name_category']}, кол-во книг = {obj['books_count']}")
+#
