@@ -17,10 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from library.views import get_all_books
 from test_app.views import home_page
+
+
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),  # http://127.0.0.1:8000/admin/
     path('<str:user_name>/', home_page),  # http://127.0.0.1:8000
+    path('api/v1/books', get_all_books),
 ]

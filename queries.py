@@ -1,4 +1,6 @@
 import os
+from sys import is_stack_trampoline_active
+
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
@@ -309,24 +311,24 @@ from django.db.models import (Count, Q)
 
 # ПОЛУЧИТЬ список книг цена которых выше срадней у того же автора
 
-from django.db.models import F
-
-subquery = (
-    Book.objects
-    .filter(author=OuterRef('author'))
-    .values('author')
-    .annotate(avg_price=Avg('price'))
-    .values('avg_price')
-)
-
-
-general_query = (
-    Book.objects
-    .annotate(avg_price_by_author=Subquery(subquery))
-    .filter(
-        price__gt=F('avg_price_by_author')
-    )
-)
+# from django.db.models import F
+#
+# subquery = (
+#     Book.objects
+#     .filter(author=OuterRef('author'))
+#     .values('author')
+#     .annotate(avg_price=Avg('price'))
+#     .values('avg_price')
+# )
+#
+#
+# general_query = (
+#     Book.objects
+#     .annotate(avg_price_by_author=Subquery(subquery))
+#     .filter(
+#         price__gt=F('avg_price_by_author')
+#     )
+# )
 
 """
 SELECT t1.*, (
@@ -340,3 +342,37 @@ WHERE
     t1.price > avg_price_by_author
 ;
 """
+
+from rest_framework import serializers
+from library.models import Category
+
+class UserCustomSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=25)
+    age = serializers.IntegerField(min_value=15)
+    is_active = serializers.BooleanField()
+    created_at = serializers.DateField()
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = "__all__"
+
+
+raw_data = {
+    "name": "Johnny",
+    "age": 18,
+    "is_active": True,
+    "created_at": "2025-09-01"
+}
+
+data = UserCustomSerializer(data=raw_data)
+
+print(data)
+
+if data.is_valid():
+    print(data.validated_data)
+
+else:
+    print("hjkhj")
+    print(data.errors)
+
