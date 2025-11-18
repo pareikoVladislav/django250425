@@ -340,3 +340,9 @@ WHERE
     t1.price > avg_price_by_author
 ;
 """
+
+
+
+
+
+
