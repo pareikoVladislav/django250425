@@ -12,8 +12,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 
-from sqlite_log_fact import TracedConnection
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -43,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
+    'drf_yasg',
 
     # local
     # 'test_app.apps.TestAppConfig',
@@ -88,6 +87,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        # 'NAME': BASE_DIR / 'app.db',
         # 'OPTIONS': {
         #     'factory': TracedConnection
         # }
@@ -127,9 +127,15 @@ AUTH_PASSWORD_VALIDATORS = [
     # }
 ]
 
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': True
+}
+
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication'
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         # 'rest_framework.authentication.TokenAuthentication'
         # 'rest_framework.authentication.BasicAuthentication'
     ],

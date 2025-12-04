@@ -13,5 +13,9 @@ class Publisher(models.Model):
         verbose_name_plural = "Publishers"
         ordering = ['name']
 
+        permissions = [
+            ('can_view_statistic', 'Can View Statistic')
+        ]
+
     def __str__(self):
         return self.name

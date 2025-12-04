@@ -14,12 +14,14 @@ from rest_framework.permissions import (
     AllowAny,
     IsAuthenticated,
     IsAdminUser,
-    IsAuthenticatedOrReadOnly
+    IsAuthenticatedOrReadOnly,
+    DjangoModelPermissions
 )
 from rest_framework.pagination import CursorPagination
 
 
 from library.models import Publisher
+from library.permissions.publisher import CanViewStatistic
 from library.serializers import (
     PublisherCreateUpdateSerializer,
     PublisherDetailSerializer,
@@ -29,16 +31,16 @@ from paginators import OverrideCursorPaginator
 
 
 class PublisherViewSet(ModelViewSet):
-    permission_classes = [AllowAny]
+    # permission_classes = [AllowAny]
     # pagination_class = CursorPagination
     pagination_class = OverrideCursorPaginator
-    # permission_classes = [IsAuthenticatedOrReadOnly]
+    # permission_classes = [DjangoModelPermissions]
     queryset = Publisher.objects.all()
 
     def get_permissions(self):
         if self.action == 'get_statistic_per_publisher':
-            return [IsAdminUser()]
-        return [AllowAny()]
+            return [CanViewStatistic()]
+        return super().get_permissions()
 
     def get_serializer_class(self):
         if 'list' in self.action:
