@@ -1,10 +1,19 @@
 from datetime import datetime
 
+from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
 from rest_framework.generics import ListAPIView
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import (
+    BasePermission,
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+    IsAdminUser
+)
 
 from library.models import Book
 from library.serializers import (
@@ -13,6 +22,58 @@ from library.serializers import (
     BookCreateSerializer,
     BookUpdateSerializer
 )
+from library.permissions.book import IsOwnerOrReadOnly
+
+
+
+# class UserBookListGenericView(ListAPIView):
+#     serializer_class = BookListSerializer
+#
+#     def get_queryset(self):
+#         qs = Book.objects.filter(
+#             contributor=self.request.user
+#         )
+#
+#         return qs
+
+class BookViewSet(ModelViewSet):
+    # serializer_class = BookListSerializer
+    queryset = Book.objects.all()
+
+    def get_permissions(self):
+        if any(act in self.action for act in {'retrieve', 'update', 'partial_update', 'destroy'}):
+            return [IsOwnerOrReadOnly()]
+        return super().get_permissions()
+
+    def get_serializer_class(self):
+        if 'list' in self.action or 'get_user_books' in self.action:
+            return BookListSerializer
+        if 'retrieve' in self.action:
+            return BookDetailedSerializer
+        if 'create' in self.action:
+            return BookCreateSerializer
+        return BookUpdateSerializer
+
+    @action(methods=['get',], detail=False, url_path='my')
+    # api/v1/books/
+    # api/v1/books/^[\d a-z]*$
+    # api/v1/books/my/
+    def get_user_books(self, request):
+        qs = self.get_queryset()
+
+        qs = qs.filter(
+            contibutor=request.user
+        )
+
+        serializer = self.get_serializer(qs, many=True)
+
+        return Response(
+            data=serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+
 
 
 
@@ -33,6 +94,7 @@ class BookListInRangeGenericView(ListAPIView):
         return qs
 
 class BookListCreateAPIView(APIView):
+    permission_classes = [AllowAny]
 
     def get_filtered_queryset(self, query_params):
         # queryset = model.objects.all()  # SELECT * FROM books;
@@ -54,6 +116,10 @@ class BookListCreateAPIView(APIView):
         return queryset
 
     def get(self, request: Request) -> Response:
+        print("="*100)
+        print(request.user)
+        print("="*100)
+
         books = self.get_filtered_queryset(request.query_params)
         books_dto = BookListSerializer(books, many=True)
 
